@@ -1,0 +1,99 @@
+package ShadowProject;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Scanner;
+
+public class InserRecord {
+    private final String url = "jdbc:postgresql://localhost/ShadowProject";
+    private final String user = "postgres";
+    private final String password = "test@123";
+
+    private static final String INSERT_USERS_SQL = "INSERT INTO test" +
+        "  (constituency, CandidateName, No_of_votes) VALUES " +
+        " (?, ?, ?);";
+
+    public static void main(String[] argv) throws SQLException {
+    	Scanner uName = new Scanner(System.in);
+        System.out.print(" Enter the Username: ");
+        String userName=uName.nextLine();
+        
+        System.out.print(" Enter the password: ");
+        String password=uName.nextLine();
+        
+    	if(userName.equals("pavan") && password.equals("pavan123")) {
+        	InserRecord createTableExample = new InserRecord();
+            createTableExample.insertRecord();
+    	} else {
+    		System.out.print(" Invalid ");
+    	}
+    }
+
+    public void insertRecord() throws SQLException {
+        // System.out.println(INSERT_USERS_SQL);
+        // Step 1: Establishing a Connection
+    	Scanner noconstencies = new Scanner(System.in);
+        System.out.print(" Enter the number of Constituencies: ");
+        int noConstituencies=noconstencies.nextInt();
+        
+        
+        try (Connection connection = DriverManager.getConnection(url, user, password);
+            // Step 2:Create a statement using connection object
+            PreparedStatement preparedStatement = connection.prepareStatement(INSERT_USERS_SQL)) {
+        	for (int i = 0; i < noConstituencies; i++){
+                
+                Scanner constName = new Scanner(System.in);
+                System.out.print(" Enter the constituency: ");
+                String ConstituencyName=constName.nextLine();
+                
+                Scanner nocda = new Scanner(System.in);
+                System.out.print(" Enter the number of candidates: ");
+                int noofcandidates=nocda.nextInt();
+                
+	            for (int j = 0; j < noofcandidates; j++){
+	            	
+	            	Scanner candName = new Scanner(System.in);
+	                System.out.print(" Enter the Candidate Name: ");
+	                String CandidateName=constName.nextLine();
+	                
+	                Scanner noofv = new Scanner(System.in);
+	                System.out.print(" Enter the No of Votes: ");
+	                int NoOfVotes=noofv.nextInt();
+	                
+	            	preparedStatement.setString(1, ConstituencyName);
+	                preparedStatement.setString(2, CandidateName);
+	                preparedStatement.setInt(3, NoOfVotes);
+	
+//	                System.out.println(preparedStatement);
+	                // Step 3: Execute the query or update query
+	                preparedStatement.executeUpdate();
+	            }
+        	}
+            
+        } catch (SQLException e) {
+
+            // print SQL exception information
+            printSQLException(e);
+        }
+
+        // Step 4: try-with-resource statement will auto close the connection.
+    }
+
+    public static void printSQLException(SQLException ex) {
+        for (Throwable e: ex) {
+            if (e instanceof SQLException) {
+                e.printStackTrace(System.err);
+                System.err.println("SQLState: " + ((SQLException) e).getSQLState());
+                System.err.println("Error Code: " + ((SQLException) e).getErrorCode());
+                System.err.println("Message: " + e.getMessage());
+                Throwable t = ex.getCause();
+                while (t != null) {
+                    System.out.println("Cause: " + t);
+                    t = t.getCause();
+                }
+            }
+        }
+    }
+}
